@@ -106,7 +106,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           </Link>
         </p>
         
-        <div style={{ marginTop: '1rem', padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', fontSize: '0.9rem' }}>
+        <div className="demo-credentials-box">
           <p style={{ margin: '0 0 0.5rem 0', fontWeight: '600' }}>Demo Credentials:</p>
           <p style={{ margin: '0.25rem 0', fontSize: '0.8rem' }}>
             <strong>Admin:</strong> admin@gdgconnect.com / admin123

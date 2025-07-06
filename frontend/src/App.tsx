@@ -37,7 +37,15 @@ function App() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    () => (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+  );
   
+  useEffect(() => {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   // Load events from database on component mount
   useEffect(() => {
     loadEvents();
@@ -219,45 +227,51 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        <Route path="/register" element={<Register />} />
-        <Route 
-          path="/admin" 
-          element={
-            userRole === 'admin' 
-              ? <AdminDashboard 
-                  events={events} 
-                  setEvents={setEvents}
-                  addEvent={addEvent}
-                  updateEvent={updateEvent}
-                  deleteEvent={deleteEvent}
-                  getEventRegistrations={getEventRegistrations}
-                  onLogout={handleLogout}
-                /> 
-              : <Navigate to="/login" />
-          } 
-        />
-        <Route 
-          path="/student" 
-          element={
-            userRole === 'student' 
-              ? <StudentDashboard 
-                  events={events} 
-                  setEvents={setEvents}
-                  registerStudent={registerStudent}
-                  unregisterStudent={unregisterStudent}
-                  getStudentRegistrations={getStudentRegistrations}
-                  onLogout={handleLogout}
-                  user={user}
-                /> 
-              : <Navigate to="/login" />
-          } 
-        />
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </Router>
+    <div className={`app-root ${theme}`}>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/register" element={<Register />} />
+          <Route 
+            path="/admin" 
+            element={
+              userRole === 'admin' 
+                ? <AdminDashboard 
+                    events={events} 
+                    setEvents={setEvents}
+                    addEvent={addEvent}
+                    updateEvent={updateEvent}
+                    deleteEvent={deleteEvent}
+                    getEventRegistrations={getEventRegistrations}
+                    onLogout={handleLogout}
+                    theme={theme}
+                    setTheme={setTheme}
+                  /> 
+                : <Navigate to="/login" />
+            } 
+          />
+          <Route 
+            path="/student" 
+            element={
+              userRole === 'student' 
+                ? <StudentDashboard 
+                    events={events} 
+                    setEvents={setEvents}
+                    registerStudent={registerStudent}
+                    unregisterStudent={unregisterStudent}
+                    getStudentRegistrations={getStudentRegistrations}
+                    onLogout={handleLogout}
+                    user={user}
+                    theme={theme}
+                    setTheme={setTheme}
+                  /> 
+                : <Navigate to="/login" />
+            } 
+          />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 

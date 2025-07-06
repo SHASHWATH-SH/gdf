@@ -33,6 +33,8 @@ interface AdminDashboardProps {
   deleteEvent: (id: number) => Promise<void>;
   getEventRegistrations: (eventId: number) => Promise<Student[]>;
   onLogout: () => void;
+  theme: 'light' | 'dark';
+  setTheme: React.Dispatch<React.SetStateAction<'light' | 'dark'>>;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -42,7 +44,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   updateEvent, 
   deleteEvent, 
   getEventRegistrations,
-  onLogout
+  onLogout,
+  theme,
+  setTheme
 }) => {
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -169,7 +173,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     <div className="dashboard">
       <header className="dashboard-header">
         <h1>GDG Connect - Admin Dashboard</h1>
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              border: 'none',
+              background: theme === 'light' ? '#222' : '#f3f4f6',
+              color: theme === 'light' ? '#fff' : '#222',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+            }}
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+          </button>
+          <button onClick={handleLogout} className="logout-btn">Logout</button>
+        </div>
       </header>
 
       <div className="dashboard-content">

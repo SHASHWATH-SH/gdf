@@ -505,4 +505,140 @@
   .modal-actions {
     flex-direction: column;
   }
+}
+
+.dark {
+  /* General background and text */
+  background: #111 !important;
+  color: #e5ffe5 !important;
+}
+
+.dark .dashboard,
+.dark .auth-bg {
+  background: linear-gradient(135deg, #111 0%, #1a2e1a 100%) !important;
+}
+
+.dark .dashboard-header {
+  background: rgba(17, 24, 17, 0.95) !important;
+  color: #e5ffe5 !important;
+}
+
+.dark .dashboard-header h1,
+.dark .stat-card h3,
+.dark .stat-card p,
+.dark .events-section h2,
+.dark .event-header h3,
+.dark .students-table th,
+.dark .students-table td,
+.dark .no-events,
+.dark .no-registrations {
+  color: #b9ffb9 !important;
+}
+
+.dark .stat-card,
+.dark .events-section,
+.dark .event-card,
+.dark .modal,
+.dark .auth-card {
+  background: #181f18 !important;
+  color: #e5ffe5 !important;
+  border-color: #1a3a1a !important;
+}
+
+.dark .event-card.registered {
+  background: #193d19 !important;
+  border-color: #22d3ee !important;
+}
+
+.dark .logout-btn,
+.dark .add-event-btn,
+.dark .register-btn,
+.dark .unregister-btn,
+.dark .material-download-btn {
+  background: #22c55e !important;
+  color: #111 !important;
+}
+
+.dark .logout-btn:hover,
+.dark .add-event-btn:hover,
+.dark .register-btn:hover,
+.dark .unregister-btn:hover,
+.dark .material-download-btn:hover {
+  background: #16a34a !important;
+}
+
+.dark .modal-actions button:last-child {
+  background: #193d19 !important;
+  color: #b9ffb9 !important;
+}
+
+.dark .file-hint,
+.dark .event-details,
+.dark .students-table th,
+.dark .students-table td {
+  color: #b9ffb9 !important;
+}
+
+.dark input,
+.dark textarea {
+  background: #111 !important;
+  color: #e5ffe5 !important;
+  border: 1px solid #22c55e !important;
+}
+
+.dark .registered-badge {
+  background: #22c55e !important;
+  color: #111 !important;
+}
+
+.dark .material-badge.slides {
+  background: #bbf7d0 !important;
+  color: #166534 !important;
+}
+
+.dark .auth-card {
+  background: #181f18 !important;
+  color: #e5ffe5 !important;
+}
+
+.dark .auth-link {
+  color: #22c55e !important;
+  text-shadow: 0 1px 2px #111;
+}
+
+.dark .auth-card div[style*='background: #f8fafc'],
+.dark .auth-card div[style*='background: #f8fafc'] *,
+.dark .auth-card div[style*='background: #bbf7d0'],
+.dark .auth-card div[style*='background: #bbf7d0'] *,
+.dark .auth-card div[style*='background: #f8fafc'] p,
+.dark .auth-card div[style*='background: #f8fafc'] strong,
+.dark .auth-card div[style*='background: #bbf7d0'] p,
+.dark .auth-card div[style*='background: #bbf7d0'] strong {
+  color: #111 !important;
+}
+
+.dark .auth-error {
+  background: #2e1a1a !important;
+  color: #ffb9b9 !important;
+}
+
+.dark .auth-role label {
+  color: #fff !important;
+}
+
+.demo-credentials-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #222;
+}
+
+.dark .demo-credentials-box {
+  background: #bbf7d0 !important;
+  color: #111 !important;
+}
+.dark .demo-credentials-box * {
+  color: #111 !important;
 } 
