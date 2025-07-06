@@ -374,6 +374,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({
                       >
                         Download
                       </button>
+                      {/* Video player for viewing the recording */}
+                      <video controls width="320" style={{ marginTop: '0.5rem' }}>
+                        <source src={`/api/events/${event.id}/recording`} type={event.recording_type || 'video/mp4'} />
+                        Your browser does not support the video tag.
+                      </video>
                     </div>
                   )}
                 </div>

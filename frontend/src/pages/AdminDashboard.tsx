@@ -49,7 +49,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [showRegistrations, setShowRegistrations] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState<'slide' | 'recording'>('slide');
+  const [uploadType, setUploadType] = useState<'slide'>('slide');
   const [registeredStudents, setRegisteredStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newEvent, setNewEvent] = useState({
@@ -90,7 +90,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleUploadMaterial = (event: Event, type: 'slide' | 'recording') => {
+  const handleUploadMaterial = (event: Event, type: 'slide') => {
     setSelectedEvent(event);
     setUploadType(type);
     setShowUploadModal(true);
@@ -100,10 +100,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     e.preventDefault();
     if (!uploadFile || !selectedEvent) return;
 
-    // Check file size (limit to 10MB for reasonable file sizes)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Check file size (limit to 500MB for large video files)
+    const maxSize = 500 * 1024 * 1024; // 500MB
     if (uploadFile.size > maxSize) {
-      alert(`File too large! Maximum size is 10MB. Your file is ${(uploadFile.size / 1024 / 1024).toFixed(1)}MB`);
+      alert(`File too large! Maximum size is 500MB. Your file is ${(uploadFile.size / 1024 / 1024).toFixed(1)}MB`);
       return;
     }
 
@@ -129,22 +129,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           fileContentPreview: fileContent.substring(0, 100) + '...'
         });
         
-        const updateData = {
-          ...selectedEvent,
-          [uploadType === 'slide' ? 'slides' : 'recording']: uploadFile.name,
-          [`${uploadType === 'slide' ? 'slides' : 'recording'}_data`]: fileContent,
-          [`${uploadType === 'slide' ? 'slides' : 'recording'}_type`]: uploadFile.type
-        };
+        const formData = new FormData();
+        formData.append('slides', uploadFile);
         
-        console.log('Admin: Update data keys:', Object.keys(updateData));
-        console.log('Admin: File data field:', uploadType === 'slide' ? 'slides_data' : 'recording_data');
-        console.log('Admin: File data present:', !!updateData[uploadType === 'slide' ? 'slides_data' : 'recording_data']);
+        console.log('Admin: Update data keys:', Array.from(formData.keys()));
+        console.log('Admin: File data field:', 'slides');
+        console.log('Admin: File data present:', !!formData.get('slides'));
         
-        await updateEvent(selectedEvent.id, updateData);
+        await fetch(`/api/events/${selectedEvent.id}/upload-slides`, {
+          method: 'POST',
+          body: formData,
+        });
 
         setUploadFile(null);
         setShowUploadModal(false);
-        alert(`${uploadType === 'slide' ? 'Slides' : 'Recording'} uploaded successfully!\nFile: ${uploadFile.name}\nSize: ${(uploadFile.size / 1024).toFixed(1)} KB`);
+        alert(`Slides uploaded successfully!\nFile: ${uploadFile.name}\nSize: ${(uploadFile.size / 1024).toFixed(1)} KB`);
       } catch (error: any) {
         console.error('Admin: Upload failed:', error);
         alert(`Failed to upload file: ${error.message || 'Unknown error'}`);
@@ -245,7 +244,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {showUploadModal && selectedEvent && (
           <div className="modal-overlay">
             <div className="modal">
-              <h2>Upload {uploadType === 'slide' ? 'Slides' : 'Recording'}</h2>
+              <h2>Upload Slides</h2>
               <p className="upload-info">
                 Uploading for: <strong>{selectedEvent.title}</strong>
               </p>
@@ -253,15 +252,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="file-upload">
                   <input
                     type="file"
-                    accept={uploadType === 'slide' ? '.pdf,.ppt,.pptx,.txt' : '.mp4,.avi,.mov,.txt'}
+                    accept=".pdf,.ppt,.pptx,.txt"
                     onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
                     required
                   />
                   <p className="file-hint">
-                    {uploadType === 'slide' 
-                      ? 'Accepted formats: PDF, PPT, PPTX, TXT (for testing)' 
-                      : 'Accepted formats: MP4, AVI, MOV, TXT (for testing)'
-                    }
+                    Accepted formats: PDF, PPT, PPTX, TXT (for testing)
                   </p>
                 </div>
                 <div className="modal-actions">
@@ -343,16 +339,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   {event.slides && (
                     <span className="material-badge slides">📄 Slides Available</span>
                   )}
-                  {event.recording && (
-                    <span className="material-badge recording">🎥 Recording Available</span>
-                  )}
                 </div>
                 <div className="event-actions">
                   <button onClick={() => handleUploadMaterial(event, 'slide')}>
                     📄 Upload Slides
-                  </button>
-                  <button onClick={() => handleUploadMaterial(event, 'recording')}>
-                    🎥 Upload Recording
                   </button>
                   <button onClick={() => handleViewRegistrations(event)}>
                     👥 View Registrations ({(event.registeredStudents || 0)})

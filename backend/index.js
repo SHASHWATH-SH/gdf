@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 // Try to load .env file if it exists
 try {
   require('dotenv').config();
@@ -12,6 +15,13 @@ try {
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' })); // Increased limit for file uploads
+
+const upload = multer({ limits: { fileSize: 200 * 1024 * 1024 } }); // 200MB limit
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 
 // MySQL connection with fallback values
 const db = mysql.createConnection({
@@ -44,9 +54,9 @@ app.post('/api/login', (req, res) => {
     if (results.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
 
     const user = results[0];
-    console.log('Login attempt:', { email, password, userPassword: user.password, role: user.role });
+    //console.log('Login attempt:', { email, password, userPassword: user.password, role: user.role });
     const match = await bcrypt.compare(password, user.password);
-    console.log('Password match result:', match);
+    //console.log('Password match result:', match);
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
     res.json({ 
@@ -302,4 +312,56 @@ app.get('/api/events/:id/files', (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
+});
+
+// Video upload endpoint
+app.post('/api/events/:id/upload-recording', upload.single('recording'), (req, res) => {
+  const { id } = req.params;
+  const file = req.file;
+  const eventId = Number(id);
+  console.log('Upload endpoint hit:', { id, eventIdType: typeof eventId, filePresent: !!file, fileName: file?.originalname, fileType: file?.mimetype });
+  if (!file) return res.status(400).json({ error: 'No file uploaded' });
+
+  // Check if event exists
+  db.query('SELECT id FROM events WHERE id = ?', [eventId], (err, results) => {
+    if (err) {
+      console.log('DB select error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    if (results.length === 0) {
+      console.log('Event not found for upload:', eventId);
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    // Save file to uploads directory
+    const filePath = path.join(uploadDir, file.originalname);
+    fs.writeFileSync(filePath, file.buffer);
+
+    // Update event with filename and mimetype
+    db.query(
+      'UPDATE events SET recording = ?, recording_type = ? WHERE id = ?',
+      [file.originalname, file.mimetype, eventId],
+      (err, result) => {
+        console.log('DB update result:', { err, result, eventId });
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Event not found for update' });
+        }
+        res.json({ success: true });
+      }
+    );
+  });
+});
+
+// Serve video file for event
+app.get('/api/events/:id/recording', (req, res) => {
+  const { id } = req.params;
+  db.query('SELECT recording, recording_type FROM events WHERE id = ?', [id], (err, results) => {
+    if (err || results.length === 0) return res.status(404).json({ error: 'Recording not found' });
+    const { recording, recording_type } = results[0];
+    const filePath = path.join(uploadDir, recording);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found' });
+    res.setHeader('Content-Type', recording_type);
+    fs.createReadStream(filePath).pipe(res);
+  });
 });
